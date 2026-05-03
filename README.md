@@ -1,352 +1,369 @@
 # Helix — Stellar Academic
 
-> **Stellar Academic**: Freighter ile Stellar Testnet’e bağlanan, fizik öğrenme modülleri ve **Satın Alma** akışında **klasik XLM ödemesi (Horizon)** kullanan tam yığın bir örnek uygulama. İsteğe bağlı **Soroban** sözleşme ID’leri `.env` ile açılır; kontratsız kurulum için de akış tasarılmıştır.
+> **Stellar Academic**: A full-stack sample application that connects to the Stellar Testnet via Freighter, uses physics learning modules, and employs **classic XLM payment (Horizon)** in the **Purchase** flow. Optional **Soroban** contract IDs are enabled via `.env`; the flow is also designed to work without any contract deployment.
 
 ---
 
-## İçindekiler
+## 🔗 Live Testnet Proof
 
-1. [Stellar Nedir?](#1-stellar-nedir)
-2. [Blockchain (Blok Zinciri) Nedir?](#2-blockchain-blok-zinciri-nedir)
-3. [XLM (Lumen) Nedir?](#3-xlm-lumen-nedir)
-4. [Cüzdan (Wallet) Nedir?](#4-cüzdan-wallet-nedir)
-5. [Freighter Nedir?](#5-freighter-nedir)
-6. [Akıllı Sözleşme Nedir?](#6-akıllı-sözleşme-nedir)
-7. [Soroban Nedir?](#7-soroban-nedir)
-8. [Stellar Neyle Kodlanır?](#8-stellar-neyle-kodlanır)
-9. [Testnet ve Mainnet Farkı](#9-testnet-ve-mainnet-farkı)
-10. [Proje Mimarisi](#10-proje-mimarisi)
-11. [Windows Kurulumu](#11-windows-kurulumu)
-12. [Linux Kurulumu](#12-linux-kurulumu)
-13. [Projeyi Çalıştırma](#13-projeyi-çalıştırma)
-14. [Akıllı Sözleşmeyi Deploy Etme](#14-akıllı-sözleşmeyi-deploy-etme)
-15. [Proje Dosya Yapısı](#15-proje-dosya-yapısı)
-16. [API Referansı](#16-api-referansı)
-17. [Sık Sorulan Sorular](#17-sık-sorulan-sorular)
-18. [Ortam değişkenleri (özeti)](#18-ortam-değişkenleri-özeti)
+|                      |                                                                                                                                                                                   |
+| -------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Account**          | [`GB2TA6IWKCRTWUWGB65V6AOJFL5VOJKQC2HFGKJ4BPUPQFCUIBA75KDY`](https://stellar.expert/explorer/testnet/account/GB2TA6IWKCRTWUWGB65V6AOJFL5VOJKQC2HFGKJ4BPUPQFCUIBA75KDY)            |
+| **Transaction Hash** | [`287e4f8b9332201016affa01daa57357ed968e205c304f730c56ee9f0253323e`](https://stellar.expert/explorer/testnet/tx/287e4f8b9332201016affa01daa57357ed968e205c304f730c56ee9f0253323e) |
+| **Network**          | Stellar Testnet                                                                                                                                                                   |
+
+> This transaction demonstrates a live XLM payment processed through Freighter on the Stellar Testnet as part of the course purchase flow.
 
 ---
 
-## 1. Stellar Nedir?
+## Table of Contents
 
-**Stellar**, 2014 yılında **Jed McCaleb** ve **Joyce Kim** tarafından kurulan, açık kaynaklı bir **merkeziyetsiz ödeme ağıdır**. Amacı; bankası olmayan insanlara, farklı para birimlerini hızlı ve ucuz şekilde birbirine dönüştürme imkânı sunmaktır.
-
-### Stellar'ı Özel Kılan Nedir?
-
-| Özellik | Stellar | Geleneksel Banka Transferi |
-|---|---|---|
-| İşlem süresi | ~3-5 saniye | 1-5 iş günü |
-| İşlem ücreti | ~0.00001 XLM (neredeyse sıfır) | 5–50 USD |
-| Çalışma saati | 7/24 | Mesai saatleri |
-| Coğrafi sınır | Yok | Ülkeye göre değişir |
-| Aracı | Yok (merkeziyetsiz) | Banka, Swift ağı |
-
-### Stellar'ın Kullanım Alanları
-
-- **Para havalesi:** Yurt dışına ucuz ve hızlı para gönderme
-- **Tokenizasyon:** Gayrimenkul, hisse senedi, altın gibi varlıkları dijital token'a çevirme
-- **Mikro ödeme:** İçerik üreticilerine küçük miktarlarda ödeme
-- **DeFi (Merkeziyetsiz Finans):** Banka olmadan borç verme ve alma
-- **Kurumsal ödeme:** MoneyGram, IBM gibi şirketler Stellar altyapısını kullanır
-
-### Stellar Vakfı (SDF)
-
-Stellar'ın gelişimini **Stellar Development Foundation (SDF)** yürütür. SDF kâr amacı gütmeyen bir kuruluştur ve ağın açık ve erişilebilir kalmasını sağlar.
+1. [What is Stellar?](#1-what-is-stellar)
+2. [What is Blockchain?](#2-what-is-blockchain)
+3. [What is XLM (Lumen)?](#3-what-is-xlm-lumen)
+4. [What is a Wallet?](#4-what-is-a-wallet)
+5. [What is Freighter?](#5-what-is-freighter)
+6. [What is a Smart Contract?](#6-what-is-a-smart-contract)
+7. [What is Soroban?](#7-what-is-soroban)
+8. [How is Stellar Coded?](#8-how-is-stellar-coded)
+9. [Testnet vs Mainnet](#9-testnet-vs-mainnet)
+10. [Project Architecture](#10-project-architecture)
+11. [Windows Setup](#11-windows-setup)
+12. [Linux Setup](#12-linux-setup)
+13. [Running the Project](#13-running-the-project)
+14. [Deploying the Smart Contract](#14-deploying-the-smart-contract)
+15. [Project File Structure](#15-project-file-structure)
+16. [API Reference](#16-api-reference)
+17. [FAQ](#17-faq)
+18. [Environment Variables (Summary)](#18-environment-variables-summary)
 
 ---
 
-## 2. Blockchain (Blok Zinciri) Nedir?
+## 1. What is Stellar?
 
-Blockchain'i anlamak için önce klasik bir veritabanı düşünün: Bir banka, "Ali'nin hesabında 1000 TL var" bilgisini kendi sunucusunda saklar. Bankaya güveniriz çünkü o kayıtları yönetir.
+**Stellar** is an open-source **decentralized payment network** founded in 2014 by **Jed McCaleb** and **Joyce Kim**. Its goal is to give unbanked people the ability to convert between different currencies quickly and cheaply.
 
-**Blockchain'de ise bu kayıt binlerce bilgisayara dağıtılır.** Hiçbir merkezi otorite yoktur.
+### What Makes Stellar Special?
 
-### Nasıl Çalışır?
+| Feature          | Stellar                    | Traditional Bank Transfer |
+| ---------------- | -------------------------- | ------------------------- |
+| Transaction time | ~3–5 seconds               | 1–5 business days         |
+| Transaction fee  | ~0.00001 XLM (nearly zero) | 5–50 USD                  |
+| Operating hours  | 24/7                       | Business hours only       |
+| Geographic limit | None                       | Varies by country         |
+| Intermediary     | None (decentralized)       | Bank, SWIFT network       |
+
+### Use Cases for Stellar
+
+- **Remittances:** Send money abroad cheaply and quickly
+- **Tokenization:** Convert real-world assets (real estate, stocks, gold) into digital tokens
+- **Micro-payments:** Pay content creators in small amounts
+- **DeFi (Decentralized Finance):** Lend and borrow without a bank
+- **Enterprise payments:** Companies like MoneyGram and IBM use Stellar infrastructure
+
+### Stellar Development Foundation (SDF)
+
+The development of Stellar is driven by the **Stellar Development Foundation (SDF)**, a non-profit organization ensuring the network remains open and accessible.
+
+---
+
+## 2. What is Blockchain?
+
+To understand blockchain, first imagine a classic database: a bank stores "Ali has 1000 TL in his account" on its own server. We trust the bank because it manages those records.
+
+**In blockchain, that record is distributed across thousands of computers.** There is no central authority.
+
+### How Does It Work?
 
 ```
-[İşlem gerçekleşir]
+[Transaction occurs]
         ↓
-[İşlem ağdaki bilgisayarlara yayılır]
+[Transaction is broadcast to network computers]
         ↓
-[Bilgisayarlar (validatörler) işlemi doğrular]
+[Computers (validators) verify the transaction]
         ↓
-[Onaylanan işlem bir "blok"a eklenir]
+[Approved transaction is added to a "block"]
         ↓
-[Blok, zincire eklenir → değiştirilemez]
+[Block is appended to the chain → immutable]
 ```
 
-### Blockchain'in Temel Özellikleri
+### Core Properties of Blockchain
 
-- **Şeffaflık:** Tüm işlemler herkese açık görüntülenebilir
-- **Değiştirilemezlik:** Eklenen veri silinemez veya değiştirilemez
-- **Merkeziyetsizlik:** Tek bir sunucu değil, binlerce bilgisayar
-- **Güven:** Sisteme güvenmek için bir kuruma güvenmek zorunda değilsiniz
+- **Transparency:** All transactions are publicly visible
+- **Immutability:** Added data cannot be deleted or changed
+- **Decentralization:** Thousands of computers, not a single server
+- **Trust:** You don't need to trust an institution to trust the system
 
-### Stellar'ın Konsensüs Mekanizması: SCP
+### Stellar's Consensus Mechanism: SCP
 
-Stellar, işlemleri doğrulamak için **Stellar Consensus Protocol (SCP)** kullanır. Enerji tüketen "madencilik" (Bitcoin'deki gibi) yoktur. Bunun yerine güvenilen validatör düğümleri oylama yaparak işlemleri onaylar. Bu yüzden Stellar çok hızlı ve çevre dostudur.
-
----
-
-## 3. XLM (Lumen) Nedir?
-
-**XLM**, Stellar ağının yerel kripto para birimidir. "Lumen" olarak da bilinir.
-
-### XLM'nin Görevleri
-
-**1. İşlem Ücreti Ödemek**
-Her Stellar işlemi çok küçük bir XLM ücreti gerektirir (0.00001 XLM ≈ 0.000003 USD). Bu ücret spam'i önler.
-
-**2. Minimum Bakiye (Base Reserve)**
-Bir Stellar hesabının aktif kalması için en az **1 XLM** bulundurması gerekir. Her ek kayıt (trustline, veri girişi vb.) için +0.5 XLM gerekir. Bu, ağı gereksiz hesaplardan korur.
-
-**3. Köprü Para Birimi**
-Örneğin TRY → USD dönüşümünde doğrudan piyasa yoksa, sistem otomatik olarak TRY → XLM → USD yolunu kullanabilir.
-
-### XLM Nasıl Edinilir?
-
-- **Testnet için (ücretsiz):** Friendbot aracılığıyla test XLM alınır
-- **Mainnet için:** Binance, Coinbase gibi borsalardan satın alınır
+Stellar uses the **Stellar Consensus Protocol (SCP)** to validate transactions. There is no energy-intensive "mining" (as in Bitcoin). Instead, trusted validator nodes vote to approve transactions. This makes Stellar very fast and eco-friendly.
 
 ---
 
-## 4. Cüzdan (Wallet) Nedir?
+## 3. What is XLM (Lumen)?
 
-Kripto cüzdanı, klasik bir cüzdandan farklıdır. **Paranın kendisini değil, paranıza erişim anahtarlarınızı saklar.**
+**XLM** is the native cryptocurrency of the Stellar network, also known as "Lumen."
 
-### Cüzdanın Bileşenleri
+### Roles of XLM
+
+**1. Paying Transaction Fees**
+Every Stellar transaction requires a tiny XLM fee (0.00001 XLM ≈ 0.000003 USD). This fee prevents spam.
+
+**2. Minimum Balance (Base Reserve)**
+A Stellar account must hold at least **1 XLM** to remain active. Each additional entry (trustline, data entry, etc.) requires +0.5 XLM. This protects the network from unnecessary accounts.
+
+**3. Bridge Currency**
+For example, if there's no direct TRY → USD market, the system can automatically use the TRY → XLM → USD path.
+
+### How to Get XLM
+
+- **For Testnet (free):** Receive test XLM via Friendbot
+- **For Mainnet:** Purchase on exchanges like Binance or Coinbase
+
+---
+
+## 4. What is a Wallet?
+
+A crypto wallet is different from a traditional wallet. **It doesn't store the money itself — it stores your keys to access the money.**
+
+### Wallet Components
 
 ```
 ┌─────────────────────────────────────────────────────┐
-│                    STELLAR HESABI                    │
+│                   STELLAR ACCOUNT                    │
 │                                                     │
-│  Açık Anahtar (Public Key):                         │
-│  GABC...XYZ  ← Banka hesap numaranız gibi           │
-│               Herkesle paylaşabilirsiniz            │
+│  Public Key:                                        │
+│  GABC...XYZ  ← Like your bank account number        │
+│               Can be shared with anyone             │
 │                                                     │
-│  Gizli Anahtar (Secret Key / Private Key):          │
-│  SABC...XYZ  ← PIN kodunuz/şifreniz gibi            │
-│               KİMSEYLE PAYLAŞMAYIN!                 │
+│  Secret Key / Private Key:                          │
+│  SABC...XYZ  ← Like your PIN / password             │
+│               NEVER SHARE WITH ANYONE!              │
 └─────────────────────────────────────────────────────┘
 ```
 
-### Cüzdan Türleri
+### Wallet Types
 
-| Tür | Örnek | Güvenlik | Kolaylık |
-|---|---|---|---|
-| **Tarayıcı Eklentisi** | Freighter | Orta | Yüksek |
-| **Masaüstü Uygulaması** | Solar Wallet | İyi | Orta |
-| **Donanım Cüzdanı** | Ledger | Çok Yüksek | Düşük |
-| **Kağıt Cüzdan** | Yazdırılmış anahtar | Çok Yüksek | Çok Düşük |
-| **Borsa Cüzdanı** | Binance | Düşük* | Çok Yüksek |
+| Type                  | Example      | Security  | Convenience |
+| --------------------- | ------------ | --------- | ----------- |
+| **Browser Extension** | Freighter    | Medium    | High        |
+| **Desktop App**       | Solar Wallet | Good      | Medium      |
+| **Hardware Wallet**   | Ledger       | Very High | Low         |
+| **Paper Wallet**      | Printed key  | Very High | Very Low    |
+| **Exchange Wallet**   | Binance      | Low\*     | Very High   |
 
-> *Borsa cüzdanlarında özel anahtarınız size ait değildir. "Not your keys, not your coins."
+> \*On exchange wallets, the private key is not yours. "Not your keys, not your coins."
 
-### Cüzdan ile Ne Yapabilirsiniz?
+### What Can You Do With a Wallet?
 
-- XLM ve diğer Stellar varlıklarını gönderip alabilirsiniz
-- Akıllı sözleşmelerle etkileşime girebilirsiniz
-- Token'lara güven limiti (trustline) açabilirsiniz
-- İşlemleri imzalayabilirsiniz
+- Send and receive XLM and other Stellar assets
+- Interact with smart contracts
+- Open trustlines to tokens
+- Sign transactions
 
 ---
 
-## 5. Freighter Nedir?
+## 5. What is Freighter?
 
-**Freighter**, Stellar ağı için geliştirilmiş ücretsiz bir **tarayıcı cüzdan eklentisidir**. MetaMask'ın Ethereum için yaptığını Freighter, Stellar için yapar.
+**Freighter** is a free **browser wallet extension** built for the Stellar network. It does for Stellar what MetaMask does for Ethereum.
 
-### Freighter'ın Özellikleri
+### Freighter Features
 
-- Chrome, Firefox ve Brave tarayıcılarında çalışır
-- Birden fazla hesap yönetimi
-- Testnet / Mainnet arasında kolay geçiş
-- Web uygulamalarına güvenli bağlantı
-- İşlemleri imzalamadan önce kullanıcıya gösterir
+- Works on Chrome, Firefox, and Brave
+- Manages multiple accounts
+- Easy switching between Testnet / Mainnet
+- Secure connection to web applications
+- Shows transactions to the user before signing
 
-### Freighter Nasıl Çalışır?
+### How Freighter Works
 
 ```
-Web Uygulaması            Freighter            Stellar Ağı
+Web Application          Freighter            Stellar Network
      │                       │                      │
-     │── "İşlem İmzala" ──►  │                      │
-     │                       │ Kullanıcıya Sor      │
-     │                       │ [Onayla] / [Reddet]  │
-     │  ◄── İmzalı XDR ────  │                      │
+     │── "Sign Transaction" ►│                      │
+     │                       │ Ask User             │
+     │                       │ [Approve] / [Reject] │
+     │  ◄── Signed XDR ────  │                      │
      │                       │                      │
-     │──────────────── İmzalı İşlemi Gönder ──────► │
+     │──────────────── Send Signed Transaction ────►│
 ```
 
-Uygulama hiçbir zaman gizli anahtarınıza erişemez. Freighter yalnızca imzalanmış işlemi geri döner.
+The application never has access to your secret key. Freighter only returns the signed transaction.
 
-### Freighter Kurulumu
+### Installing Freighter
 
-1. Chrome Web Store'a gidin
-2. "Freighter Wallet" aratın
-3. "Chrome'a Ekle" butonuna tıklayın
-4. Eklenti açıldığında yeni bir hesap oluşturun veya mevcut anahtarınızı içe aktarın
-5. **Testnet için:** Ayarlar → Ağ → Testnet seçin
+1. Go to the Chrome Web Store
+2. Search for "Freighter Wallet"
+3. Click "Add to Chrome"
+4. Once installed:
+   - Create a new wallet or import an existing key
+   - **Save your secret key somewhere safe!**
+   - Settings → Network → Select **Testnet**
 
 ---
 
-## 6. Akıllı Sözleşme Nedir?
+## 6. What is a Smart Contract?
 
-**Akıllı sözleşme (smart contract)**, blockchain üzerinde çalışan bir bilgisayar programıdır. Normal bir sözleşme gibi kurallar içerir; ancak bu kurallar otomatik olarak, aracıya gerek kalmadan uygulanır.
+A **smart contract** is a computer program that runs on a blockchain. Like a regular contract, it contains rules — but those rules are enforced automatically, without any intermediary.
 
-### Klasik Sözleşme vs Akıllı Sözleşme
+### Classic Contract vs Smart Contract
 
 ```
-Klasik Sözleşme:
-  Ali → Para Gönder → Banka → Kontrol Et → Mehmet
-                        ↑
-                   Aracıya güven
+Classic Contract:
+  Ali → Send Money → Bank → Verify → Mehmet
+                      ↑
+               Trust the intermediary
 
-Akıllı Sözleşme:
-  Ali → Koşul Sağlandı mı? → Evet → Otomatik Transfer → Mehmet
-                ↑
-          Kod güvencesi (değiştirilemez)
+Smart Contract:
+  Ali → Condition Met? → Yes → Auto Transfer → Mehmet
+              ↑
+         Code guarantee (immutable)
 ```
 
-### Gerçek Hayat Örneği
+### Real-Life Example
 
-**Kira sözleşmesi akıllı sözleşme olsaydı:**
-- Her ayın 1'inde kiracının hesabından kira otomatik çekilir
-- Ev sahibi kapı şifresini verir; kira ödenirse şifre çalışmaya devam eder
-- Ödeme yapılmazsa şifre otomatik iptal olur
-- Ne ev sahibi ne kiracı ne de avukat süreci yönetmek zorunda kalır
+**If a rental agreement were a smart contract:**
 
-### Bu Projede Akıllı Sözleşme
+- Rent is automatically deducted from the tenant's account on the 1st of each month
+- The landlord provides a door code; it keeps working as long as rent is paid
+- If payment is missed, the code is automatically revoked
+- Neither landlord, tenant, nor lawyer needs to manage the process
 
-Bu projede **sayaç sözleşmesi** yer almaktadır. Basit bir örnek olarak tasarlanmıştır:
+### Smart Contract in This Project
 
-- Blockchain üzerinde bir sayı saklar
-- Herkes sayıyı artırabilir veya azaltabilir
-- Yalnızca admin sıfırlayabilir
-- Tüm değişiklikler blockchain'de kalıcıdır, kimse silemez
+This project includes a **counter contract** as a simple example:
 
-### Akıllı Sözleşmenin Avantajları
+- Stores a number on the blockchain
+- Anyone can increment or decrement it
+- Only the admin can reset it
+- All changes are permanent on the blockchain — nobody can delete them
 
-- **Güven:** Kodun ne yapacağı önceden bellidir
-- **Şeffaflık:** Kaynak kodu herkese açık
-- **Otomasyon:** İnsan müdahalesi gerekmez
-- **Maliyet:** Aracı komisyonu yoktur
+### Advantages of Smart Contracts
+
+- **Trust:** What the code will do is known in advance
+- **Transparency:** Source code is open to everyone
+- **Automation:** No human intervention required
+- **Cost:** No intermediary commission
 
 ---
 
-## 7. Soroban Nedir?
+## 7. What is Soroban?
 
-**Soroban**, Stellar'ın akıllı sözleşme platformudur. 2023 yılında Stellar ağına entegre edilmiştir.
+**Soroban** is Stellar's smart contract platform, integrated into the Stellar network in 2023.
 
-### Soroban'ın Teknik Altyapısı
+### Soroban's Technical Foundation
 
-Soroban sözleşmeleri **WebAssembly (WASM)** formatında derlenir ve Stellar ağında çalıştırılır. WebAssembly; hız, güvenlik ve taşınabilirlik için tasarlanmış modern bir ikili format standardıdır.
+Soroban contracts are compiled into **WebAssembly (WASM)** format and run on the Stellar network. WebAssembly is a modern binary format standard designed for speed, security, and portability.
 
 ```
-Rust Kodu (.rs)
-      ↓ derleme
+Rust Code (.rs)
+      ↓ compile
 WebAssembly (.wasm)
       ↓ deploy
-Stellar Ağı (blockchain)
-      ↓ çalıştırma
-Sonuç (return value)
+Stellar Network (blockchain)
+      ↓ execute
+Result (return value)
 ```
 
-### Soroban'ın Özellikleri
+### Soroban Features
 
-- **Rust dili:** Güvenli, hızlı sistem programlama dili
-- **Deterministik yürütme:** Aynı giriş her zaman aynı çıktıyı verir
-- **Kaynak limitleri:** Her işlem CPU ve bellek limitleriyle çalışır
-- **3 depolama tipi:**
-  - `instance` — sözleşmenin ömrüyle yaşar (global ayarlar)
-  - `persistent` — manuel TTL yönetimi (kullanıcı bakiyeleri)
-  - `temporary` — süreli, otomatik silinir (önbellekler)
+- **Rust language:** Safe, fast systems programming language
+- **Deterministic execution:** Same input always produces same output
+- **Resource limits:** Each transaction runs with CPU and memory limits
+- **3 storage types:**
+  - `instance` — lives with the contract's lifetime (global settings)
+  - `persistent` — manual TTL management (user balances)
+  - `temporary` — time-limited, auto-deleted (caches)
 
 ### Soroban vs Ethereum Solidity
 
-| | Soroban (Stellar) | Solidity (Ethereum) |
-|---|---|---|
-| Dil | Rust | Solidity (kendine özgü) |
-| VM | WebAssembly | EVM |
-| İşlem ücreti | Çok düşük | Değişken (gas) |
-| İşlem hızı | ~5 saniye | ~12 saniye |
-| Test araçları | Cargo test | Hardhat / Foundry |
+|                   | Soroban (Stellar) | Solidity (Ethereum) |
+| ----------------- | ----------------- | ------------------- |
+| Language          | Rust              | Solidity (custom)   |
+| VM                | WebAssembly       | EVM                 |
+| Transaction fee   | Very low          | Variable (gas)      |
+| Transaction speed | ~5 seconds        | ~12 seconds         |
+| Test tooling      | Cargo test        | Hardhat / Foundry   |
 
 ---
 
-## 8. Stellar Neyle Kodlanır?
+## 8. How is Stellar Coded?
 
-Stellar ekosistemi birden fazla katmandan oluşur ve her katman farklı teknolojilerle kodlanır.
+The Stellar ecosystem consists of multiple layers, each coded with different technologies.
 
-### Katman 1: Akıllı Sözleşmeler → Rust
+### Layer 1: Smart Contracts → Rust
 
 ```rust
-// Örnek: Basit bir sayaç sözleşmesi
+// Example: Simple counter contract
 #![no_std]
 use soroban_sdk::{contract, contractimpl, Env};
 
 #[contract]
-pub struct SayacSozlesmesi;
+pub struct CounterContract;
 
 #[contractimpl]
-impl SayacSozlesmesi {
-    pub fn artir(env: Env) -> u32 {
-        let deger: u32 = env.storage().instance().get(&"sayac").unwrap_or(0);
-        let yeni = deger + 1;
-        env.storage().instance().set(&"sayac", &yeni);
-        yeni
+impl CounterContract {
+    pub fn increment(env: Env) -> u32 {
+        let value: u32 = env.storage().instance().get(&"counter").unwrap_or(0);
+        let new_val = value + 1;
+        env.storage().instance().set(&"counter", &new_val);
+        new_val
     }
 }
 ```
 
-**Neden Rust?**
-- Bellek güvenliği: Çalışma zamanı hatası olmadan güvenli kod
-- Yüksek performans: C/C++ hızında çalışır
-- WebAssembly desteği: Kolayca WASM'a derlenir
-- Zengin ekosistem: `cargo` paket yöneticisi
+**Why Rust?**
 
-### Katman 2: Backend (Sunucu Tarafı) → JavaScript / Node.js
+- Memory safety: Safe code without runtime errors
+- High performance: Runs at C/C++ speed
+- WebAssembly support: Compiles to WASM easily
+- Rich ecosystem: `cargo` package manager
+
+### Layer 2: Backend (Server Side) → JavaScript / Node.js
 
 ```javascript
-// Horizon API ile hesap bilgisi çekme
+// Fetching account info via Horizon API
 import { Horizon } from "@stellar/stellar-sdk";
 
 const horizon = new Horizon.Server("https://horizon-testnet.stellar.org");
-const hesap = await horizon.loadAccount("GABC...XYZ");
-console.log(hesap.balances); // XLM ve token bakiyeleri
+const account = await horizon.loadAccount("GABC...XYZ");
+console.log(account.balances); // XLM and token balances
 ```
 
-Alternatif backend dilleri:
-- **Python:** `stellar-sdk` kütüphanesi ile
-- **Go:** `stellar/go` resmi SDK'sı
-- **Java:** Resmi Java SDK
+Alternative backend languages:
 
-### Katman 3: Frontend (Tarayıcı Tarafı) → React + TypeScript
+- **Python:** via `stellar-sdk` library
+- **Go:** official `stellar/go` SDK
+- **Java:** Official Java SDK
+
+### Layer 3: Frontend (Browser Side) → React + TypeScript
 
 ```typescript
-// Freighter ile cüzdan bağlantısı
+// Connecting wallet with Freighter
 import { getAddress, signTransaction } from "@stellar/freighter-api";
 
 const { address } = await getAddress();
-console.log("Bağlanan adres:", address);
+console.log("Connected address:", address);
 ```
 
-### Bu Projenin Teknoloji Yığını
+### This Project's Tech Stack
 
 ```
 ┌─────────────────────────────────────────────┐
 │  FRONTEND                                   │
 │  React 18 + TypeScript + Vite               │
-│  @stellar/stellar-sdk  (işlem oluşturma)    │
-│  @stellar/freighter-api (cüzdan bağlantısı) │
+│  @stellar/stellar-sdk  (transaction build)  │
+│  @stellar/freighter-api (wallet connect)    │
 ├─────────────────────────────────────────────┤
 │  BACKEND                                    │
 │  Node.js + Express                          │
 │  @stellar/stellar-sdk (Horizon API)         │
 ├─────────────────────────────────────────────┤
-│  AKILLI SÖZLEŞME                            │
+│  SMART CONTRACT                             │
 │  Rust + soroban-sdk                         │
-│  Stellar CLI (derleme & deploy)             │
+│  Stellar CLI (build & deploy)               │
 ├─────────────────────────────────────────────┤
-│  STELLAR AĞI (TESTNET)                      │
+│  STELLAR NETWORK (TESTNET)                  │
 │  Horizon API  → horizon-testnet.stellar.org │
 │  Soroban RPC  → soroban-testnet.stellar.org │
 └─────────────────────────────────────────────┘
@@ -354,31 +371,31 @@ console.log("Bağlanan adres:", address);
 
 ---
 
-## 9. Testnet ve Mainnet Farkı
+## 9. Testnet vs Mainnet
 
-| | Testnet | Mainnet |
-|---|---|---|
-| Para | Sahte XLM (değersiz) | Gerçek XLM (piyasa değeri var) |
-| Amaç | Geliştirme ve test | Gerçek kullanım |
-| Friendbot | Ücretsiz XLM alınabilir | Yok |
-| Hesap açma | Friendbot ile ücretsiz | XLM satın alınmalı |
-| Explorer | stellar.expert/testnet | stellar.expert/public |
-| Risk | Sıfır | Gerçek para kaybı |
+|                  | Testnet                 | Mainnet                 |
+| ---------------- | ----------------------- | ----------------------- |
+| Currency         | Fake XLM (worthless)    | Real XLM (market value) |
+| Purpose          | Development and testing | Real-world use          |
+| Friendbot        | Free XLM available      | Not available           |
+| Account creation | Free via Friendbot      | Must purchase XLM       |
+| Explorer         | stellar.expert/testnet  | stellar.expert/public   |
+| Risk             | Zero                    | Real money at stake     |
 
-> Bu proje **Testnet** üzerinde çalışır. Gerçek para gerekli değildir.
+> This project runs on **Testnet**. No real money is required.
 
 ---
 
-## 10. Proje Mimarisi
+## 10. Project Architecture
 
 ```
-Kullanıcı Tarayıcısı
+User Browser
         │
         │ HTTP (React SPA)
         ▼
 ┌──────────────┐        ┌──────────────────┐
-│   Frontend   │◄──────►│  Freighter Cüzdan│
-│  (Vite:5173) │        │  (Tarayıcı Ext.) │
+│   Frontend   │◄──────►│ Freighter Wallet │
+│  (Vite:5173) │        │ (Browser Ext.)   │
 └──────┬───────┘        └──────────────────┘
        │ REST API
        ▼
@@ -392,76 +409,80 @@ Kullanıcı Tarayıcısı
 │       Stellar Testnet        │
 │  ┌────────────┐ ┌─────────┐  │
 │  │ Horizon    │ │ Soroban │  │
-│  │ (Klasik)   │ │  (RPC)  │  │
+│  │ (Classic)  │ │  (RPC)  │  │
 │  └────────────┘ └─────────┘  │
 └──────────────────────────────┘
 ```
 
 ---
 
-## 11. Windows Kurulumu
+## 11. Windows Setup
 
-### Adım 1: Node.js Kurulumu
+### Step 1: Install Node.js
 
-Node.js, JavaScript'i tarayıcı dışında çalıştıran bir ortamdır.
+Node.js is a runtime that allows JavaScript to run outside the browser.
 
-1. [https://nodejs.org](https://nodejs.org) adresine gidin
-2. **"LTS"** (Long Term Support) sürümünü indirin
-3. İndirilen `.msi` dosyasını çalıştırın
-4. Kurulumu "Next → Next → Install" şeklinde tamamlayın
+1. Go to [https://nodejs.org](https://nodejs.org)
+2. Download the **LTS** (Long Term Support) version
+3. Run the downloaded `.msi` file
+4. Complete the setup by clicking "Next → Next → Install"
 
-Kurulum doğrulama (Komut İstemi / PowerShell):
+Verify installation (Command Prompt / PowerShell):
+
 ```cmd
 node --version
 npm --version
 ```
-Her iki komut da versiyon numarası gösteriyorsa kurulum başarılıdır.
+
+If both commands show a version number, installation was successful.
 
 ---
 
-### Adım 2: Rust Kurulumu (Akıllı Sözleşme için)
+### Step 2: Install Rust (for Smart Contracts)
 
-Rust, Soroban akıllı sözleşmelerini yazmak için kullanılır.
+Rust is used to write Soroban smart contracts.
 
-1. [https://rustup.rs](https://rustup.rs) adresine gidin
-2. `rustup-init.exe` dosyasını indirin ve çalıştırın
-3. Komut penceresinde `1` tuşuna basın (varsayılan kurulum)
-4. Kurulum tamamlandıktan sonra **yeni bir terminal** açın
+1. Go to [https://rustup.rs](https://rustup.rs)
+2. Download and run `rustup-init.exe`
+3. Press `1` in the command window (default installation)
+4. Open a **new terminal** after installation completes
 
 ```cmd
 rustc --version
 cargo --version
 ```
 
-WebAssembly hedefini ekleyin:
+Add the WebAssembly target:
+
 ```cmd
 rustup target add wasm32-unknown-unknown
 ```
 
 ---
 
-### Adım 3: Stellar CLI Kurulumu
+### Step 3: Install Stellar CLI
 
-Stellar CLI, sözleşme derleme ve deploy işlemleri için kullanılır.
+Stellar CLI is used for compiling and deploying contracts.
 
 ```cmd
 cargo install --locked stellar-cli
 ```
 
-> Bu işlem ilk kurulumda 5-10 dakika sürebilir.
+> This may take 5–10 minutes on first install.
 
-Doğrulama:
+Verify:
+
 ```cmd
 stellar --version
 ```
 
 ---
 
-### Adım 4: Git Kurulumu
+### Step 4: Install Git
 
-1. [https://git-scm.com](https://git-scm.com) adresine gidin
-2. Windows sürümünü indirin ve kurun
-3. Kurulum sırasında tüm seçenekleri varsayılan bırakabilirsiniz
+1. Go to [https://git-scm.com](https://git-scm.com)
+2. Download and install the Windows version
+3. All options can be left as default during setup
 
 ```cmd
 git --version
@@ -469,34 +490,36 @@ git --version
 
 ---
 
-### Adım 5: Freighter Tarayıcı Eklentisi
+### Step 5: Freighter Browser Extension
 
-1. Google Chrome veya Brave tarayıcısını açın
-2. [Freighter Wallet](https://www.freighter.app/) sitesine gidin
-3. "Download for Chrome" butonuna tıklayın
-4. Chrome Web Store'da "Chrome'a Ekle" deyin
-5. Eklenti kurulduktan sonra:
-   - Yeni cüzdan oluşturun
-   - **Güvenli bir yere gizli anahtarınızı kaydedin!**
-   - Ayarlar → Ağ → **Testnet** seçin
+1. Open Google Chrome or Brave
+2. Go to [Freighter Wallet](https://www.freighter.app/)
+3. Click "Download for Chrome"
+4. Click "Add to Chrome" in the Chrome Web Store
+5. After installation:
+   - Create a new wallet
+   - **Save your secret key somewhere safe!**
+   - Settings → Network → Select **Testnet**
 
 ---
 
-### Adım 6: Projeyi İndirin ve Çalıştırın
+### Step 6: Clone and Install the Project
 
 ```cmd
-git clone https://github.com/KULLANICI_ADINIZ/helix.git
+git clone https://github.com/YOUR_USERNAME/helix.git
 cd helix
 ```
 
-Frontend bağımlılıklarını yükleyin:
+Install frontend dependencies:
+
 ```cmd
 cd frontend
 npm install
 cd ..
 ```
 
-Backend bağımlılıklarını yükleyin:
+Install backend dependencies:
+
 ```cmd
 cd backend
 npm install
@@ -505,23 +528,26 @@ cd ..
 
 ---
 
-## 12. Linux Kurulumu
+## 12. Linux Setup
 
-### Adım 1: Sistem Güncellemesi
+### Step 1: System Update
 
 **Ubuntu / Debian:**
+
 ```bash
 sudo apt update && sudo apt upgrade -y
 sudo apt install -y curl git build-essential pkg-config libssl-dev
 ```
 
 **Fedora / RHEL:**
+
 ```bash
 sudo dnf update -y
 sudo dnf install -y curl git gcc openssl-devel
 ```
 
 **Arch Linux:**
+
 ```bash
 sudo pacman -Syu
 sudo pacman -S curl git base-devel openssl
@@ -529,80 +555,87 @@ sudo pacman -S curl git base-devel openssl
 
 ---
 
-### Adım 2: Node.js Kurulumu
+### Step 2: Install Node.js
 
-**nvm (Node Version Manager) ile kurulum önerilir:**
+**Recommended via nvm (Node Version Manager):**
 
 ```bash
-# nvm'yi indir ve kur
+# Download and install nvm
 curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh | bash
 
-# Terminal'i yenile
-source ~/.bashrc  # veya source ~/.zshrc
+# Reload terminal
+source ~/.bashrc  # or source ~/.zshrc
 
-# LTS sürümü kur
+# Install LTS version
 nvm install --lts
 nvm use --lts
 ```
 
-Doğrulama:
+Verify:
+
 ```bash
-node --version   # v20.x.x veya üzeri olmalı
+node --version   # Should be v20.x.x or higher
 npm --version
 ```
 
 ---
 
-### Adım 3: Rust Kurulumu
+### Step 3: Install Rust
 
 ```bash
 curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
 ```
 
-Yükleyici açıldığında `1` tuşuna basın (varsayılan kurulum).
+Press `1` when the installer opens (default installation).
 
-Terminal'i yenileyin:
+Reload terminal:
+
 ```bash
 source ~/.cargo/env
 ```
 
-Doğrulama:
+Verify:
+
 ```bash
 rustc --version
 cargo --version
 ```
 
-WebAssembly hedefini ekleyin:
+Add the WebAssembly target:
+
 ```bash
 rustup target add wasm32-unknown-unknown
 ```
 
 ---
 
-### Adım 4: Stellar CLI Kurulumu
+### Step 4: Install Stellar CLI
 
 ```bash
 cargo install --locked stellar-cli
 ```
 
-Eğer `~/.cargo/bin` PATH'inizde değilse ekleyin:
+If `~/.cargo/bin` is not in your PATH, add it:
+
 ```bash
 echo 'export PATH="$HOME/.cargo/bin:$PATH"' >> ~/.bashrc
 source ~/.bashrc
 ```
 
-Doğrulama:
+Verify:
+
 ```bash
 stellar --version
 ```
 
 ---
 
-### Adım 5: Freighter Tarayıcı Eklentisi
+### Step 5: Freighter Browser Extension
 
-Linux'ta Chrome veya Chromium tarayıcısı kullanabilirsiniz.
+You can use Chrome or Chromium on Linux.
 
-**Chrome kurulumu (Ubuntu):**
+**Chrome installation (Ubuntu):**
+
 ```bash
 wget -q -O - https://dl.google.com/linux/linux_signing_key.pub | sudo apt-key add -
 sudo sh -c 'echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" >> /etc/apt/sources.list.d/google-chrome.list'
@@ -610,14 +643,14 @@ sudo apt update
 sudo apt install google-chrome-stable
 ```
 
-Ardından Chrome'da Freighter eklentisini kurun (aynı adımlar Windows ile aynıdır).
+Then install the Freighter extension in Chrome (same steps as Windows).
 
 ---
 
-### Adım 6: Projeyi İndirin
+### Step 6: Clone the Project
 
 ```bash
-git clone https://github.com/KULLANICI_ADINIZ/helix.git
+git clone https://github.com/YOUR_USERNAME/helix.git
 cd helix
 
 # Frontend
@@ -629,29 +662,30 @@ cd backend && npm install && cd ..
 
 ---
 
-## 13. Projeyi Çalıştırma
+## 13. Running the Project
 
-### Frontend'i Başlatın
+### Start the Frontend
 
 ```bash
 cd frontend
 npm run dev
 ```
 
-Tarayıcıda açın: `http://localhost:5173`
+Open in browser: `http://localhost:5173`
 
 ---
 
-### Backend'i Başlatın (ayrı terminal)
+### Start the Backend (separate terminal)
 
 ```bash
 cd backend
 npm run dev
 ```
 
-Backend çalışıyor: `http://localhost:4000`
+Backend running at: `http://localhost:4000`
 
-Sağlık kontrolü:
+Health check:
+
 ```bash
 curl http://localhost:4000/api/health
 # {"ok":true,"network":"testnet","timestamp":"..."}
@@ -659,192 +693,200 @@ curl http://localhost:4000/api/health
 
 ---
 
-### Helix · Stellar Academic arayüzü
+### Helix · Stellar Academic Interface
 
-| Alan | Ne yapılır |
-|------|------------|
-| **Giriş** | Yerel Demo oturumu (kullanıcı adı / şifre bilgisayardan sunucuya gitmez). Üst bardaki karşılamada görünen ad `Profil`de kaydedilebilir. |
-| **Freighter ile Bağlan** | Sağ üst; tüm sekmedeki cüzdan durumu **`FreighterProvider`** ile tek kaynaktan yönetilir. |
-| **Yolculuk** | Mühendislik içerik / yol haritası. |
-| **Profil** | Görünen ad (`localStorage`) + seçili kullanıcı + Stellar cüzdan özeti ve Freighter bağlantısı. |
-| **Satın Alma** | Ders katalogu → eğitmen → **XLM** ile ödeme (`payWithFreighter`, Horizon işlemi → **işlem hash**). Opsiyonel ders Kontrat client’ı ayrı. |
-| **Helix +** | Ek araçlar (WalletInfo, ders listesi, takvim vb.). |
+| Section                    | What it does                                                                                                                                                  |
+| -------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Login**                  | Local demo session (credentials don't leave your machine). The display name shown in the top bar can be saved in **Profile**.                                 |
+| **Connect with Freighter** | Top right; wallet state across all tabs is managed from a single source via **`FreighterProvider`**.                                                          |
+| **Journey**                | Engineering content / roadmap.                                                                                                                                |
+| **Profile**                | Display name (`localStorage`) + selected user + Stellar wallet summary and Freighter connection.                                                              |
+| **Purchase**               | Course catalog → instructor → pay with **XLM** (`payWithFreighter`, Horizon transaction → **transaction hash**). Optional course contract client is separate. |
+| **Helix+**                 | Extra tools (WalletInfo, course list, calendar, etc.).                                                                                                        |
 
-Ödeme tarafında **asıl doğrulama**: Horizon üzerinden başarıyla gönderilen **Ödeme (payment)** işlemi ve dönen **transaction hash**. Soroban deploy etmediyseniz veya Kontrat ID alamazsanız bu tasarımla çelişmez; başarı onayında arayüzde de bunu belirten metin yer alır.
-
----
-
-### Frontend ortam dosyası
-
-`frontend/.env.example` dosyasındaki değişkenleri kopyalayıp `frontend/.env` oluşturun (`.env` repoya eklemeyin). Ayrıntılı tablo: [§18 Ortam değişkenleri (özeti)](#18-ortam-değişkenleri-özeti).
+**Core payment validation**: A successful **Payment** transaction sent through Horizon and the returned **transaction hash**. If you haven't deployed Soroban or don't have a Contract ID, this design handles it gracefully — the success confirmation in the UI explicitly notes this.
 
 ---
 
-### Uygulamayı Kullanmak
+### Frontend Environment File
 
-1. Tarayıcıda `http://localhost:5173` adresini açın.
-2. Giriş formunda kullanıcı adı ve şifre ile devam edin (demo oturumu).
-3. Üstünde **Freighter ile Bağlan** ile cüzdana bağlanın (Satın Alma ve Profil özellikleri için).
-4. **Profil** veya ilgili sekmelerde adres / bakiye bilgisini doğrulayın.
-5. **Satın Alma** sekmesinde ders seçip akışı tamamlayın; Testnet için hesabınızı Friendbot ile fonlayın.
+Copy the variables from `frontend/.env.example` and create `frontend/.env` (don't commit `.env` to the repo). See [§18 Environment Variables](#18-environment-variables-summary) for details.
 
 ---
 
-### Testnet XLM Almak (Ücretsiz)
+### Using the Application
 
-Testnet'te hesabınızı fonlamak için Friendbot kullanın:
+1. Open `http://localhost:5173` in your browser.
+2. Continue with a username and password in the login form (demo session).
+3. Click **Connect with Freighter** in the header to connect your wallet (required for Purchase and Profile features).
+4. Verify your address / balance in **Profile** or relevant tabs.
+5. Select a course in the **Purchase** tab and complete the flow; fund your account with Friendbot for Testnet.
+
+---
+
+### Getting Testnet XLM (Free)
+
+Use Friendbot to fund your account on Testnet:
 
 ```bash
-curl "https://friendbot.stellar.org?addr=HESAP_ADRESINIZ"
+curl "https://friendbot.stellar.org?addr=YOUR_ACCOUNT_ADDRESS"
 ```
 
-Veya tarayıcıdan:
+Or via browser:
+
 ```
 https://friendbot.stellar.org?addr=GABC...XYZ
 ```
 
 ---
 
-## 14. Akıllı Sözleşmeyi Deploy Etme
+## 14. Deploying the Smart Contract
 
-### Adım 1: Kimlik Oluşturun
+### Step 1: Generate an Identity
 
 ```bash
-stellar keys generate --global gelistirici --network testnet --fund
+stellar keys generate --global developer --network testnet --fund
 ```
 
-Bu komut:
-- `gelistirici` adında bir kimlik oluşturur
-- Testnet'te otomatik fonlar (10.000 test XLM)
+This command:
 
-Adresinizi görün:
+- Creates an identity named `developer`
+- Automatically funds it on Testnet (10,000 test XLM)
+
+View your address:
+
 ```bash
-stellar keys address gelistirici
+stellar keys address developer
 ```
 
 ---
 
-### Adım 2: Sözleşmeyi Derleyin
+### Step 2: Build the Contract
 
 ```bash
 cd contracts/counter
 stellar contract build
 ```
 
-Derleme çıktısı:
+Build output:
+
 ```
 target/wasm32-unknown-unknown/release/counter.wasm
 ```
 
 ---
 
-### Adım 3: Testnet'e Deploy Edin
+### Step 3: Deploy to Testnet
 
 ```bash
 stellar contract deploy \
   --wasm target/wasm32-unknown-unknown/release/counter.wasm \
-  --source gelistirici \
+  --source developer \
   --network testnet \
   -- \
-  --admin gelistirici
+  --admin developer
 ```
 
-Komut bir **Contract ID** döndürür (C harfiyle başlar):
+The command returns a **Contract ID** (starts with C):
+
 ```
 CXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ```
 
-Bu ID'yi kopyalayın!
+Copy this ID!
 
 ---
 
-### Adım 4: Ortam Değişkenini Ayarlayın
+### Step 4: Set the Environment Variable
 
-`frontend/` klasöründe `.env` dosyası oluşturun:
+Create a `.env` file in the `frontend/` folder:
 
 ```bash
 # frontend/.env
-VITE_COUNTER_CONTRACT_ID=CXXXXXXX...  # Kopyaladığınız ID
+VITE_COUNTER_CONTRACT_ID=CXXXXXXX...  # The ID you copied
 ```
 
-Frontend'i yeniden başlatın:
+Restart the frontend:
+
 ```bash
 cd frontend
 npm run dev
 ```
 
-Artık arayüzde **"Sayaç Sözleşmesi"** kartı görünecek!
+The **"Counter Contract"** card will now appear in the UI!
 
 ---
 
-### Adım 5: Sözleşmeyi Test Edin (Opsiyonel)
+### Step 5: Test the Contract (Optional)
 
-Rust unit testleri:
+Rust unit tests:
+
 ```bash
 cd contracts/counter
 cargo test
 ```
 
-CLI ile manuel test:
+Manual testing with CLI:
+
 ```bash
-# Sayacı oku
+# Read counter
 stellar contract invoke \
   --id CXXXXX... \
-  --source gelistirici \
+  --source developer \
   --network testnet \
   -- get_count
 
-# Sayacı artır
+# Increment counter
 stellar contract invoke \
   --id CXXXXX... \
-  --source gelistirici \
+  --source developer \
   --network testnet \
   -- increment
 ```
 
 ---
 
-## 15. Proje Dosya Yapısı
+## 15. Project File Structure
 
 ```
 helix/
-├── contracts/                         ← Soroban sözleşmeler (Rust workspace)
+├── contracts/                         ← Soroban contracts (Rust workspace)
 │   ├── counter/
 │   │   ├── Cargo.toml
-│   │   └── src/lib.rs                 ← Örnek sayaç kontratı
+│   │   └── src/lib.rs                 ← Sample counter contract
 │   ├── lesson-contract/
-│   │   └── …                          ← Ders kontratı kaynakları
+│   │   └── …                          ← Lesson contract sources
 │   ├── education_contract/
 │   └── STELLAR_CONTRACT_README.md
 │
 ├── frontend/                          ← Vite + React + TypeScript
-│   ├── .env.example                   ← Örnek VITE_* değişkenleri (kopyalayın)
+│   ├── .env.example                   ← Sample VITE_* variables (copy this)
 │   ├── src/
-│   │   ├── main.tsx                   ← Root; FreighterProvider sarmalı
-│   │   ├── App.tsx                    ← Sekmeli akademi ana uygulama
+│   │   ├── main.tsx                   ← Root; wrapped by FreighterProvider
+│   │   ├── App.tsx                    ← Tabbed academy main app
 │   │   ├── hooks/
-│   │   │   └── useFreighter.tsx       ← Tekil cüzdan context (FreighterProvider)
+│   │   │   └── useFreighter.tsx       ← Single wallet context (FreighterProvider)
 │   │   ├── components/
 │   │   │   ├── ConnectButton.tsx
 │   │   │   ├── WalletInfo.tsx
-│   │   │   ├── LessonCatalog.tsx      ← Ücretli ders katalogu + satın alma girişi
-│   │   │   ├── PurchasePage.tsx       ← Ödeme modalı (e-posta → XLM → onay)
-│   │   │   ├── LessonPurchaseCover.tsx ← Ders kartı görsel tema
-│   │   │   ├── lessonPurchaseThemes.ts ← Gradient / ikon temaları
+│   │   │   ├── LessonCatalog.tsx      ← Paid course catalog + purchase entry
+│   │   │   ├── PurchasePage.tsx       ← Payment modal (email → XLM → confirm)
+│   │   │   ├── LessonPurchaseCover.tsx ← Course card visual theme
+│   │   │   ├── lessonPurchaseThemes.ts ← Gradient / icon themes
 │   │   │   ├── UserProfile.tsx
 │   │   │   ├── CounterContract.tsx
 │   │   │   ├── AcademicRecordsContract.tsx
-│   │   │   ├── CoulombCalculator.tsx · GradeCalculator.tsx · … (modüller)
+│   │   │   ├── CoulombCalculator.tsx · GradeCalculator.tsx · … (modules)
 │   │   │   └── …
 │   │   └── lib/
 │   │       ├── stellar.ts             ← Horizon, payWithFreighter, explorer
-│   │       ├── contract.ts             ← İsteğe bağlı sayaç Kontrat (VITE_COUNTER_*)
+│   │       ├── contract.ts            ← Optional counter contract (VITE_COUNTER_*)
 │   │       ├── academicContract.ts
-│   │       ├── lesson-contract.ts     ← Ders Kontrat client (mock/elastik)
-│   │       └── profileStorage.ts      ← Profil görünen adı (tarayıcı)
+│   │       ├── lesson-contract.ts     ← Lesson contract client (mock/elastic)
+│   │       └── profileStorage.ts     ← Profile display name (browser)
 │   └── package.json
 │
-├── backend/                           ← Node / Express API (isteğe bağlı)
+├── backend/                           ← Node / Express API (optional)
 │   ├── server.js
 │   └── package.json
 │
@@ -854,14 +896,16 @@ helix/
 
 ---
 
-## 16. API Referansı
+## 16. API Reference
 
-### Backend Endpoint'leri
+### Backend Endpoints
 
 #### `GET /api/health`
-Sunucunun çalıştığını doğrular.
 
-**Yanıt:**
+Verifies the server is running.
+
+**Response:**
+
 ```json
 {
   "ok": true,
@@ -873,15 +917,17 @@ Sunucunun çalıştığını doğrular.
 ---
 
 #### `GET /api/account/:address`
-Stellar hesap bilgilerini getirir.
 
-**Parametreler:**
+Fetches Stellar account information.
 
-| Parametre | Tür | Açıklama |
-|---|---|---|
-| `address` | string | G ile başlayan 56 karakterli Stellar adresi |
+**Parameters:**
 
-**Başarılı Yanıt (200):**
+| Parameter | Type   | Description                                  |
+| --------- | ------ | -------------------------------------------- |
+| `address` | string | 56-character Stellar address starting with G |
+
+**Success Response (200):**
+
 ```json
 {
   "address": "GABC...XYZ",
@@ -893,141 +939,149 @@ Stellar hesap bilgilerini getirir.
 }
 ```
 
-**Hata Yanıtları:**
+**Error Responses:**
 
-| Kod | Açıklama |
-|---|---|
-| `400` | Geçersiz Stellar adresi |
-| `404` | Hesap bulunamadı (henüz fonlanmamış) |
-| `500` | Horizon bağlantı hatası |
+| Code  | Description                        |
+| ----- | ---------------------------------- |
+| `400` | Invalid Stellar address            |
+| `404` | Account not found (not yet funded) |
+| `500` | Horizon connection error           |
 
 ---
 
-### Akıllı Sözleşme Fonksiyonları
+### Smart Contract Functions
 
 #### `initialize(admin: Address)`
-Sözleşmeyi başlatır. Yalnızca bir kez çağrılabilir.
+
+Initializes the contract. Can only be called once.
 
 #### `increment() → u32`
-Sayacı 1 artırır, yeni değeri döner.
+
+Increments the counter by 1, returns the new value.
 
 #### `decrement() → u32`
-Sayacı 1 azaltır (minimum 0), yeni değeri döner.
+
+Decrements the counter by 1 (minimum 0), returns the new value.
 
 #### `reset()`
-Sayacı sıfırlar. Yalnızca admin çağırabilir (Freighter imzası gerekir).
+
+Resets the counter to zero. Only the admin can call this (requires Freighter signature).
 
 #### `get_count() → u32`
-Mevcut sayaç değerini okur (imza gerekmez, ücretsiz).
+
+Reads the current counter value (no signature required, free).
 
 ---
 
-## 17. Sık Sorulan Sorular
+## 17. FAQ
 
-**S: Freighter'ı bağlayamıyorum, ne yapmalıyım?**
+**Q: I can't connect Freighter. What should I do?**
 
-A: Şu adımları kontrol edin:
-1. Freighter eklentisi kurulu ve açık mı?
-2. Freighter'da **Testnet** ağı seçili mi? (Ayarlar → Ağ)
-3. Hesabınız oluşturulmuş mu?
-4. Tarayıcıyı yeniden başlatmayı deneyin.
+A: Check the following:
+
+1. Is the Freighter extension installed and open?
+2. Is **Testnet** selected in Freighter? (Settings → Network)
+3. Has your account been created?
+4. Try restarting your browser.
 
 ---
 
-**S: "Hesap bulunamadı" hatası alıyorum.**
+**Q: I'm getting an "Account not found" error.**
 
-A: Yeni oluşturulan hesaplar fonlanana kadar Stellar ağında görünmez. Friendbot ile ücretsiz test XLM alın:
+A: Newly created accounts are not visible on the Stellar network until they are funded. Get free test XLM with Friendbot:
+
 ```
-https://friendbot.stellar.org?addr=HESAP_ADRESINIZ
+https://friendbot.stellar.org?addr=YOUR_ACCOUNT_ADDRESS
 ```
 
 ---
 
-**S: Sözleşme deploy ederken hata alıyorum.**
+**Q: I'm getting an error when deploying the contract.**
 
-A: Sıkça karşılaşılan sorunlar:
-- **"insufficient XLM":** `stellar keys generate --fund` ile hesabınızı yeniden fonlayın
-- **"wasm file not found":** `stellar contract build` komutunu çalıştırdığınızdan emin olun
-- **"network mismatch":** `--network testnet` parametresini kontrol edin
+A: Common issues:
 
----
-
-**S: Gizli anahtarımı kaybettim, ne olur?**
-
-A: Gizli anahtarı kaybederseniz hesabınıza bir daha **hiçbir şekilde** erişemezsiniz. Testnet için bu sorun değil (yeni hesap açabilirsiniz), ancak Mainnet'te gerçek para kaybı anlamına gelir. **Gizli anahtarı güvenli bir yerde saklayın!**
+- **"insufficient XLM":** Re-fund your account with `stellar keys generate --fund`
+- **"wasm file not found":** Make sure you ran `stellar contract build`
+- **"network mismatch":** Check the `--network testnet` parameter
 
 ---
 
-**S: Rust öğrenmem gerekiyor mu?**
+**Q: I lost my secret key. What happens?**
 
-A: Yalnızca frontend geliştirmek için hayır. Ancak akıllı sözleşme yazmak veya değiştirmek için Rust bilgisi gerekir. Başlangıç için [The Rust Book](https://doc.rust-lang.org/book/) ücretsiz ve Türkçe çevirisi mevcuttur.
-
----
-
-**S: Bu proje Mainnet'te çalışır mı?**
-
-A: Evet, ancak `stellar.ts` dosyasındaki URL'leri Mainnet adresleriyle değiştirmeniz ve Freighter'da Mainnet'i seçmeniz gerekir. Mainnet'te gerçek XLM harcanır, dikkatli olun.
+A: If you lose your secret key, you can **never** access your account again. For Testnet this is fine (you can create a new account), but on Mainnet it means real financial loss. **Store your secret key somewhere safe!**
 
 ---
 
-**S: Kontrat adresim (Contract ID) yok; Soroban kurmadım. Sorun olur mu?**
+**Q: Do I need to learn Rust?**
 
-A: **Satın alma için hayır.** Akış klasik **XLM transferi** ile çalışır; Horizon’da görünür bir işlem çıkması hedeflenir. `frontend/.env` içinde **`VITE_LESSON_CONTRACT_ID=` boş** bırakarak ders kontrat çağrısı tarafını kapatabilirsiniz. Varsayılan repoda yerel olarak bir demo `C…` fallback ID kodda durabilir — üretimde kendi `.env` politikanızı kullanın.
-
----
-
-**S: "Freighter ile Bağlan" ve ders kartı uyumsuz bağlı görünüyordu, düzeldi mi?**
-
-A: Evet — `FreighterProvider` ile tüm bileşenler aynı cüzdan state’ini paylaşıyor. Eski tek dosyalı `useFreighter.ts` yapısı `useFreighter.tsx` + Provider modeline taşındı.
+A: No, not for frontend-only development. However, Rust knowledge is required to write or modify smart contracts. For beginners, [The Rust Book](https://doc.rust-lang.org/book/) is free and available in multiple languages.
 
 ---
 
-## 18. Ortam değişkenleri (özeti)
+**Q: Will this project work on Mainnet?**
 
-Tüm anahtarlar **`frontend/`** içinde kullanılır; Vite yüzünden `VITE_` öneki zorunludur.
-
-| Değişken | Zorunlu? | Rol |
-|---------|----------|-----|
-| `VITE_LESSON_CONTRACT_ID` | Hayır | Boş string (`""`) verilirse ders için Soroban client oluşturulmaz — yalnız XLM ödeme kaydı kullanılır. Tanımsız ise kod içi demo ID kullanılabilir. |
-| `VITE_COUNTER_CONTRACT_ID` | Hayır | Sayaç bileşeni; boş ise UI “deploy edin” uyarısı verir. |
-| `VITE_ACADEMIC_CONTRACT_ID` | Hayır | Akademik kayıt bileşeni; boş ise ilgili akış kapalıdır. |
-
-`frontend/.env.example` içinde örnek satırlar vardır. Üretimde hassas adresleri repo dışında tutun.
+A: Yes, but you'll need to replace the URLs in `stellar.ts` with Mainnet addresses and select Mainnet in Freighter. Real XLM is spent on Mainnet — be careful.
 
 ---
 
-## Faydalı Kaynaklar
+**Q: I don't have a Contract ID (I didn't set up Soroban). Is that a problem?**
 
-| Kaynak | URL |
-|---|---|
-| Stellar Resmi Dokümantasyon | https://developers.stellar.org |
-| Soroban Dokümantasyon | https://developers.stellar.org/docs/smart-contracts |
-| Stellar JavaScript SDK | https://stellar.github.io/js-stellar-sdk |
-| Soroban Rust SDK | https://docs.rs/soroban-sdk |
-| Stellar Testnet Explorer | https://stellar.expert/explorer/testnet |
-| Friendbot (Testnet Fonlama) | https://friendbot.stellar.org |
-| Freighter Cüzdan | https://www.freighter.app |
-| Rust Programlama Dili | https://www.rust-lang.org/tr |
-| The Rust Book (Türkçe) | https://rustdili.github.io |
+A: **Not for purchasing.** The flow works with classic **XLM transfer**; the goal is a visible transaction on Horizon. You can disable the lesson contract call by leaving **`VITE_LESSON_CONTRACT_ID=`** empty in `frontend/.env`. The default repo may have a local demo `C…` fallback ID in the code — use your own `.env` policy in production.
 
 ---
 
-## Katkı Sağlamak
+**Q: "Connect with Freighter" and the course card showed inconsistent connection state. Is it fixed?**
 
-1. Bu repoyu fork'layın
-2. Yeni bir dal oluşturun: `git checkout -b ozellik/yeni-ozellik`
-3. Değişikliklerinizi kaydedin: `git commit -m "Yeni özellik ekle"`
-4. Dalınızı gönderin: `git push origin ozellik/yeni-ozellik`
-5. Pull Request açın
+A: Yes — with `FreighterProvider`, all components share the same wallet state. The old single-file `useFreighter.ts` structure was migrated to the `useFreighter.tsx` + Provider model.
 
 ---
 
-## Lisans
+## 18. Environment Variables (Summary)
 
-Bu proje MIT Lisansı ile lisanslanmıştır.
+All keys are used inside **`frontend/`**; the `VITE_` prefix is required by Vite.
+
+| Variable                    | Required? | Role                                                                                                                                              |
+| --------------------------- | --------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `VITE_LESSON_CONTRACT_ID`   | No        | If empty string (`""`), no Soroban client is created for lessons — only XLM payment record is used. If undefined, an in-code demo ID may be used. |
+| `VITE_COUNTER_CONTRACT_ID`  | No        | Counter component; if empty, UI shows a "please deploy" warning.                                                                                  |
+| `VITE_ACADEMIC_CONTRACT_ID` | No        | Academic records component; if empty, that flow is disabled.                                                                                      |
+
+Example lines are in `frontend/.env.example`. Keep sensitive addresses outside the repo in production.
+
+---
+
+## Useful Resources
+
+| Resource                    | URL                                                 |
+| --------------------------- | --------------------------------------------------- |
+| Stellar Official Docs       | https://developers.stellar.org                      |
+| Soroban Documentation       | https://developers.stellar.org/docs/smart-contracts |
+| Stellar JavaScript SDK      | https://stellar.github.io/js-stellar-sdk            |
+| Soroban Rust SDK            | https://docs.rs/soroban-sdk                         |
+| Stellar Testnet Explorer    | https://stellar.expert/explorer/testnet             |
+| Friendbot (Testnet Funding) | https://friendbot.stellar.org                       |
+| Freighter Wallet            | https://www.freighter.app                           |
+| Rust Programming Language   | https://www.rust-lang.org                           |
+| The Rust Book               | https://doc.rust-lang.org/book/                     |
+
+---
+
+## Contributing
+
+1. Fork this repository
+2. Create a new branch: `git checkout -b feature/new-feature`
+3. Commit your changes: `git commit -m "Add new feature"`
+4. Push your branch: `git push origin feature/new-feature`
+5. Open a Pull Request
+
+---
+
+## License
+
+This project is licensed under the MIT License.
 
 ---
 
 <div align="center">
-  <sub>Helix · Stellar Academic — Stellar Testnet · Gerçek para içermez</sub>
+  <sub>Helix · Stellar Academic — Stellar Testnet · No real money involved</sub>
 </div>
