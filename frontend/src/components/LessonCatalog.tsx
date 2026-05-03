@@ -711,6 +711,8 @@ export default function LessonCatalog() {
           onSuccess={handlePurchaseSuccess}
           contractClient={contractClient}
           studentAddress={address || ""}
+          initialEmail={studentEmail}
+          hasStudentDiscount={studentHasDiscount}
         />
       )}
     </div>

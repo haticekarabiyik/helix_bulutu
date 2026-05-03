@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npx tsc *)",
+      "PowerShell(npx tsc --noEmit 2>&1)",
+      "PowerShell($pwd.Path; Test-Path package.json)",
+      "PowerShell(npx vite --port 5173 --strictPort 2>&1)"
+    ]
+  }
+}

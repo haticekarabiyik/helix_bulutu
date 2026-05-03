@@ -18,13 +18,29 @@ interface PurchasePageProps {
   onSuccess: (txHash: string) => void;
   contractClient: LessonContractClient | null;
   studentAddress: string;
+  initialEmail?: string;
+  hasStudentDiscount?: boolean;
 }
+
+const isStudentEmail = (email: string) => {
+  const v = email.trim().toLowerCase();
+  return (
+    v.includes("@") &&
+    (v.includes(".edu") ||
+      v.includes("ogr") ||
+      v.includes("student") ||
+      v.includes("öğrenci"))
+  );
+};
 
 const STEPS = [
   { key: "email" as const, label: "E-posta", desc: "Öğrenci doğrulama" },
   { key: "payment" as const, label: "Ödeme", desc: "XLM ile güvenli" },
   { key: "confirmation" as const, label: "Onay", desc: "Erişim açıldı" },
 ];
+
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const isValidEmail = (email: string) => EMAIL_REGEX.test(email.trim());
 
 export default function PurchasePage({
   lesson,
@@ -33,45 +49,28 @@ export default function PurchasePage({
   onSuccess,
   contractClient,
   studentAddress,
+  initialEmail = "",
+  hasStudentDiscount = false,
 }: PurchasePageProps) {
-  const [step, setStep] = useState<"email" | "payment" | "confirmation">("email");
-  const [studentEmail, setStudentEmail] = useState("");
+  const initialStep: "email" | "payment" | "confirmation" =
+    isValidEmail(initialEmail) ? "payment" : "email";
+  const [step, setStep] = useState<"email" | "payment" | "confirmation">(initialStep);
+  const [studentEmail, setStudentEmail] = useState(initialEmail);
   const [emailError, setEmailError] = useState("");
-  const [isValidating, setIsValidating] = useState(false);
   const [txHash, setTxHash] = useState("");
 
   const priceInTL = Number.parseInt(instructor.price.replace(/[^0-9]/g, ""), 10);
-  const xlmPrice = (priceInTL / 35).toFixed(4);
+  const effectivePriceTL = hasStudentDiscount || isStudentEmail(studentEmail) ? priceInTL * 0.8 : priceInTL;
+  const xlmPrice = (effectivePriceTL / 35).toFixed(4);
+  const emailIsStudent = isStudentEmail(studentEmail);
 
-  const validateEmail = async () => {
-    setIsValidating(true);
+  const handleContinue = () => {
     setEmailError("");
-
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(studentEmail)) {
+    if (!isValidEmail(studentEmail)) {
       setEmailError("Lütfen geçerli bir e-posta adresi girin");
-      setIsValidating(false);
       return;
     }
-
-    const isStudent =
-      studentEmail.toLowerCase().includes(".edu") ||
-      studentEmail.toLowerCase().includes(".edu.tr") ||
-      studentEmail.toLowerCase().includes("@student") ||
-      studentEmail.toLowerCase().includes("@ogr");
-
-    if (!isStudent) {
-      setEmailError(
-        "Lütfen geçerli bir öğrenci e-postası kullanın (.edu, .edu.tr, student, öğrenci, ogr)",
-      );
-      setIsValidating(false);
-      return;
-    }
-
-    await new Promise((resolve) => setTimeout(resolve, 900));
-
     setStep("payment");
-    setIsValidating(false);
   };
 
   const processPurchase = async () => {
@@ -172,9 +171,9 @@ export default function PurchasePage({
           </div>
         </div>
 
-        <div className="min-h-[min(520px,calc(100vh-20rem))] flex-1 overflow-y-auto px-4 py-8 sm:px-8">
+        <div className="flex-1 overflow-y-auto px-4 py-6 sm:px-8">
           {step === "email" && (
-            <div className="mx-auto max-w-md space-y-6">
+            <div className="mx-auto max-w-md space-y-5">
               <div className="overflow-hidden rounded-2xl border border-white/10">
                 <div className="flex items-start gap-3 bg-emerald-500/10 px-4 py-3">
                   <InstructorAvatar name={instructor.name} />
@@ -189,10 +188,15 @@ export default function PurchasePage({
                 </div>
               </div>
               <div>
-                <h2 className="text-xl font-bold text-white">Öğrenci e-postanızı doğrulayın</h2>
+                <h2 className="text-xl font-bold text-white">E-postanızı girin</h2>
                 <p className="mt-2 text-sm text-slate-400">
-                  İndirim ve fatura bildirimi için kurumsal öğrenci adresinizi kullanın.
+                  Fatura ve erişim bildirimi için kullanılır. Öğrenci e-postası (.edu / ogr / student) ile %20 indirim uygulanır.
                 </p>
+                {emailIsStudent ? (
+                  <p className="mt-2 inline-flex items-center gap-2 rounded-xl bg-emerald-500/10 px-3 py-1.5 text-xs font-semibold text-emerald-300 ring-1 ring-emerald-500/30">
+                    🎓 Öğrenci e-postası tespit edildi · %20 indirim uygulandı
+                  </p>
+                ) : null}
               </div>
               <div className="space-y-3">
                 <label className="block text-sm font-medium text-slate-300">E-posta</label>
@@ -203,6 +207,12 @@ export default function PurchasePage({
                     setStudentEmail(e.target.value);
                     setEmailError("");
                   }}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" && studentEmail.trim()) {
+                      e.preventDefault();
+                      handleContinue();
+                    }
+                  }}
                   placeholder="student@okul.edu.tr"
                   className="w-full rounded-2xl border border-white/10 bg-black/45 px-4 py-4 text-slate-200 placeholder:text-slate-600 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
                 />
@@ -212,19 +222,11 @@ export default function PurchasePage({
                   </p>
                 ) : null}
               </div>
-              <button
-                type="button"
-                onClick={() => void validateEmail()}
-                disabled={isValidating || !studentEmail}
-                className="w-full rounded-2xl bg-emerald-500 py-4 text-lg font-bold text-slate-950 transition hover:bg-emerald-400 disabled:cursor-not-allowed disabled:bg-slate-700 disabled:text-slate-400"
-              >
-                {isValidating ? "Doğrulanıyor..." : "Devam et"}
-              </button>
             </div>
           )}
 
           {step === "payment" && (
-            <div className="mx-auto max-w-lg space-y-6">
+            <div className="mx-auto max-w-lg space-y-5">
               <div className="grid gap-4 sm:grid-cols-3">
                 {[
                   { t: "Stellar Ledger", i: "⛓️" },
@@ -273,26 +275,11 @@ export default function PurchasePage({
               <p className="text-center text-xs text-slate-500">
                 Onayınız ile birlikte işlem blokzincirde kaydolur ve ders içeriği açılır.
               </p>
-
-              <button
-                type="button"
-                onClick={() => void processPurchase()}
-                className="w-full rounded-2xl bg-emerald-500 py-4 text-lg font-bold text-slate-950 transition hover:bg-emerald-400"
-              >
-                {xlmPrice} XLM ile öde
-              </button>
-              <button
-                type="button"
-                onClick={() => setStep("email")}
-                className="w-full rounded-2xl border border-white/10 bg-slate-900/80 py-3 font-semibold text-slate-300 transition hover:bg-slate-800"
-              >
-                Geri dön
-              </button>
             </div>
           )}
 
           {step === "confirmation" && (
-            <div className="mx-auto max-w-md space-y-6 text-center">
+            <div className="mx-auto max-w-md space-y-5 text-center">
               <div className="mx-auto flex h-24 w-24 items-center justify-center rounded-full bg-gradient-to-br from-emerald-400/40 to-teal-600/40 ring-2 ring-emerald-400/50">
                 <span className="text-5xl drop-shadow-lg">✓</span>
               </div>
@@ -307,11 +294,6 @@ export default function PurchasePage({
                   Horizon işlem özeti (XLM ödemesi)
                 </p>
                 <p className="break-all font-mono text-xs text-emerald-300">{txHash}</p>
-                <p className="mt-3 text-[11px] leading-relaxed text-slate-500">
-                  Soroban dışında kurulum yaptıysanız kontrat adresi olması şart değildir.
-                  Bizim için temel gösterge blokzincirde görünen bu transfer kaydıdır; hash veya işlem çıktısı
-                  yeterlidir. İsteğe bağlı Soroban kaydı ayrıca başarısız olsa bile bu akış böyle kabul edilir.
-                </p>
               </div>
 
               <div className="rounded-2xl border border-emerald-500/20 bg-emerald-500/5 p-4 text-left text-sm text-slate-300">
@@ -325,15 +307,47 @@ export default function PurchasePage({
                   <span className="text-slate-500">E-posta:</span> {studentEmail}
                 </p>
               </div>
+            </div>
+          )}
+        </div>
 
+        <div className="shrink-0 border-t border-white/10 bg-slate-950/95 px-4 py-4 sm:px-8">
+          {step === "email" && (
+            <button
+              type="button"
+              onClick={handleContinue}
+              disabled={!studentEmail.trim()}
+              className="w-full rounded-2xl bg-emerald-500 py-4 text-lg font-bold text-slate-950 transition hover:bg-emerald-400 disabled:cursor-not-allowed disabled:bg-slate-700 disabled:text-slate-400"
+            >
+              Ödemeye geç
+            </button>
+          )}
+          {step === "payment" && (
+            <div className="space-y-2">
               <button
                 type="button"
-                onClick={onBack}
-                className="w-full rounded-2xl bg-emerald-500 py-4 font-bold text-slate-950 transition hover:bg-emerald-400"
+                onClick={() => void processPurchase()}
+                className="w-full rounded-2xl bg-emerald-500 py-4 text-lg font-bold text-slate-950 transition hover:bg-emerald-400"
               >
-                Kataloğa dön
+                {xlmPrice} XLM ile öde
+              </button>
+              <button
+                type="button"
+                onClick={() => setStep("email")}
+                className="w-full rounded-2xl border border-white/10 bg-slate-900/80 py-2.5 text-sm font-semibold text-slate-300 transition hover:bg-slate-800"
+              >
+                Geri dön
               </button>
             </div>
+          )}
+          {step === "confirmation" && (
+            <button
+              type="button"
+              onClick={onBack}
+              className="w-full rounded-2xl bg-emerald-500 py-4 font-bold text-slate-950 transition hover:bg-emerald-400"
+            >
+              Kataloğa dön
+            </button>
           )}
         </div>
       </div>
