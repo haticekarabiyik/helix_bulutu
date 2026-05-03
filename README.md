@@ -1082,6 +1082,28 @@ This project is licensed under the MIT License.
 
 ---
 
+## Screenshots
+
+### Mühendislik Yolculuğu
+![Mühendislik Yolculuğu](docs/screenshots/01-muhendislik-yolculugu.png)
+
+### Coulomb Hesaplayıcı
+![Coulomb Hesaplayıcı](docs/screenshots/02-coulomb-hesaplayici.png)
+
+### Ders Mağazası
+![Ders Mağazası](docs/screenshots/03-ders-magazasi.png)
+
+### Ders Detayı
+![Ders Detayı](docs/screenshots/04-ders-detay.png)
+
+### Web3 Panosu
+![Web3 Panosu](docs/screenshots/05-web3-panosu.png)
+
+### Satın Alma Akışı
+![Satın Alma Akışı](docs/screenshots/06-satin-alma-akisi.png)
+
+---
+
 <div align="center">
   <sub>Helix · Stellar Academic — Stellar Testnet · No real money involved</sub>
 </div>
