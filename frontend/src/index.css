@@ -1,4 +1,10 @@
-*, *::before, *::after {
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+*,
+*::before,
+*::after {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
@@ -22,6 +28,10 @@
   --sans: "Inter", sans-serif;
   --radius: 12px;
   --radius-sm: 8px;
+}
+
+html {
+  scroll-behavior: smooth;
 }
 
 body {

@@ -1,8 +1,17 @@
 import { useFreighter } from "../hooks/useFreighter";
+import type { FreighterState } from "../hooks/useFreighter";
 import styles from "./ConnectButton.module.css";
 
-export function ConnectButton() {
-  const { status, address, connect, disconnect, isInstalled } = useFreighter();
+interface ConnectButtonProps {
+  wallet?: (FreighterState & {
+    connect: () => Promise<void>;
+    disconnect: () => void;
+  });
+}
+
+export function ConnectButton({ wallet }: ConnectButtonProps) {
+  const localWallet = useFreighter();
+  const { status, address, connect, disconnect, isInstalled } = wallet ?? localWallet;
 
   if (status === "connected" && address) {
     return (
