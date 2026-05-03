@@ -1,0 +1,134 @@
+.panel {
+  width: min(920px, 100%);
+  padding: 24px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 18px;
+}
+
+.eyebrow {
+  color: #facc15;
+  font-size: 13px;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.header h2 {
+  color: var(--text);
+  font-size: 24px;
+  line-height: 1.2;
+  text-align: left;
+}
+
+.actions,
+.reviewBox {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.reviewBox {
+  margin-top: 14px;
+}
+
+.reviewBox select {
+  min-height: 42px;
+  min-width: 220px;
+  padding: 0 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--surface2);
+  color: var(--text);
+  font: inherit;
+}
+
+.primaryButton,
+.secondaryButton {
+  border: 0;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  font-weight: 800;
+  padding: 11px 16px;
+  white-space: nowrap;
+}
+
+.primaryButton {
+  background: #facc15;
+  color: #171101;
+}
+
+.secondaryButton {
+  background: var(--surface2);
+  color: var(--text);
+  border: 1px solid var(--border);
+}
+
+.primaryButton:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.connected,
+.disconnected {
+  display: inline-flex;
+  align-items: center;
+  min-height: 40px;
+  padding: 8px 12px;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.connected {
+  color: #bbf7d0;
+  background: rgba(34, 197, 94, 0.12);
+  border: 1px solid rgba(34, 197, 94, 0.28);
+}
+
+.disconnected {
+  color: var(--text-muted);
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--border);
+}
+
+.notice {
+  margin-top: 16px;
+  padding: 12px 14px;
+  border: 1px solid rgba(250, 204, 21, 0.28);
+  border-radius: var(--radius-sm);
+  background: rgba(250, 204, 21, 0.1);
+  color: #fde68a;
+}
+
+.calendarLink {
+  display: inline-flex;
+  margin-top: 14px;
+  color: #facc15;
+  font-weight: 800;
+}
+
+@media (max-width: 720px) {
+  .header {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .actions {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .reviewBox {
+    align-items: stretch;
+    flex-direction: column;
+  }
+}

@@ -1,14 +1,44 @@
 import express from "express";
 import cors from "cors";
+import dotenv from "dotenv";
 import { Horizon, Networks } from "@stellar/stellar-sdk";
 
+
+import calendarRouter from "./calendar.js";
+import web3Router from "./web3.js";
+import coursesRouter from "./courses.js";
+
+dotenv.config();
+
 const app = express();
-const PORT = 4000;
+const PORT = process.env.PORT || 4000;
+const allowedOrigins = (
+  process.env.CORS_ORIGIN || "http://localhost:3000,http://localhost:5173,http://127.0.0.1:5173"
+)
+  .split(",")
+  .map((origin) => origin.trim())
+  .filter(Boolean);
 
 const horizon = new Horizon.Server("https://horizon-testnet.stellar.org");
 
-app.use(cors({ origin: "http://localhost:3000" }));
+app.use(
+  cors({
+    origin(origin, callback) {
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+        return;
+      }
+
+      callback(new Error("CORS origin not allowed"));
+    },
+  })
+);
 app.use(express.json());
+
+
+app.use("/api", calendarRouter);
+app.use("/api", web3Router);
+app.use("/api", coursesRouter);
 
 app.get("/api/health", (_req, res) => {
   res.json({ ok: true, network: "testnet", timestamp: new Date().toISOString() });

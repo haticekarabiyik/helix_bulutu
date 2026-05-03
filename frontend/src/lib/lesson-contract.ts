@@ -1,5 +1,3 @@
-﻿import { Address, Contract, nativeToScVal, scValToNative } from '@stellar/js-sdk';
-
 export interface Lesson {
   id: string;
   title: string;

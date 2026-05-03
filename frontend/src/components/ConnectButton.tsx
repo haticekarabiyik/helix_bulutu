@@ -1,17 +1,8 @@
 import { useFreighter } from "../hooks/useFreighter";
-import type { FreighterState } from "../hooks/useFreighter";
 import styles from "./ConnectButton.module.css";
 
-interface ConnectButtonProps {
-  wallet?: (FreighterState & {
-    connect: () => Promise<void>;
-    disconnect: () => void;
-  });
-}
-
-export function ConnectButton({ wallet }: ConnectButtonProps) {
-  const localWallet = useFreighter();
-  const { status, address, connect, disconnect, isInstalled } = wallet ?? localWallet;
+export function ConnectButton() {
+  const { status, address, connect, disconnect, isInstalled, error } = useFreighter();
 
   if (status === "connected" && address) {
     return (
@@ -20,7 +11,7 @@ export function ConnectButton({ wallet }: ConnectButtonProps) {
         <span className={styles.addressBadge}>
           {address.slice(0, 6)}...{address.slice(-6)}
         </span>
-        <button className={styles.disconnectBtn} onClick={disconnect}>
+        <button type="button" className={styles.disconnectBtn} onClick={disconnect}>
           Bağlantıyı Kes
         </button>
       </div>
@@ -41,23 +32,29 @@ export function ConnectButton({ wallet }: ConnectButtonProps) {
   }
 
   return (
-    <button
-      className={styles.connectBtn}
-      onClick={connect}
-      disabled={status === "connecting"}
-    >
-      {status === "connecting" ? (
-        <>
-          <span className={styles.spinner} />
-          Bağlanıyor...
-        </>
-      ) : (
-        <>
-          <FreighterIcon />
-          Freighter ile Bağlan
-        </>
-      )}
-    </button>
+    <div className={styles.connectWrap}>
+      {status === "error" && error && isInstalled ? (
+        <p className={styles.errorHint}>{error}</p>
+      ) : null}
+      <button
+        type="button"
+        className={styles.connectBtn}
+        onClick={connect}
+        disabled={status === "connecting"}
+      >
+        {status === "connecting" ? (
+          <>
+            <span className={styles.spinner} />
+            Bağlanıyor...
+          </>
+        ) : (
+          <>
+            <FreighterIcon />
+            Freighter ile Bağlan
+          </>
+        )}
+      </button>
+    </div>
   );
 }
 
